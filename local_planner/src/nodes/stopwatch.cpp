@@ -4,9 +4,10 @@
 
 
 namespace avoidance {
+
 StopWatch::StopWatch(){
-  start_time_ = ros::Time::now();
-};
+ // start_time_ = ros::Time::now();
+}
 
 
 void StopWatch::restart(){
@@ -32,7 +33,7 @@ ros::Duration StopWatch::split(){
 	return  duration_s_;
 }
 
-void StopWatch::setProcessTimeMsg(local_planner::ProcessTime& msg, const std::string& frame_id ){
+void StopWatch::setProcessTimeMsg(local_planner::Profiling& msg, const std::string& frame_id ){
   msg.header.stamp = ros::Time::now();
   msg.header.frame_id = frame_id;
   msg.function_name = function_name_;

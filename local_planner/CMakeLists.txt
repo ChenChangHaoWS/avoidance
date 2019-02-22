@@ -71,7 +71,7 @@ find_package(yaml-cpp REQUIRED)
 # )
 add_message_files(
   FILES
-  ProcessTime.msg
+  Profiling.msg
 )
 
 generate_messages(

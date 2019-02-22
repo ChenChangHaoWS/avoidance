@@ -3,6 +3,7 @@
 
 #include "local_planner/avoidance_output.h"
 #include "local_planner/rviz_world_loader.h"
+#include "local_planner/stopwatch.h"
 
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseArray.h>
@@ -33,7 +34,7 @@
 #include <boost/bind.hpp>
 
 // time stuff
-#include <local_planner/ProcessTime.h>
+#include <local_planner/Profiling.h>
 #include <ecl/time.hpp>
 
 #include <dynamic_reconfigure/server.h>
@@ -115,6 +116,9 @@ class LocalPlannerNode {
   std::atomic<bool> should_exit_{false};
 
   std::vector<cameraData> cameras_;
+
+  StopWatch setPose_sw_;
+  StopWatch setCurrentVelocity_sw_;
 
   ModelParameters model_params_;
 

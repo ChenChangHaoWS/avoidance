@@ -11,7 +11,7 @@
 #include <queue>
 #include <vector>
 
-#include <local_planner/ProcessTime.h>
+#include <local_planner/Profiling.h>
 
 
 namespace avoidance {
@@ -25,7 +25,6 @@ namespace avoidance {
 class StopWatch{
 public:
 	// store all durations of a function 
-    std::vector<ros::Duration> timings_;
     ros::Duration total_duration_;
     ros::Duration duration_e_;
     ros::Duration duration_s_;
@@ -37,7 +36,7 @@ public:
      **/	
 	StopWatch();
     
-    virtual ~StopWatch() {}
+    virtual ~StopWatch() {};
 
     /**
     * @brief restarts the stopwatch
@@ -59,7 +58,7 @@ public:
     /**
      * @brief Create ProcessTIme message
      **/
-    void setProcessTimeMsg(local_planner::ProcessTime& msg, const std::string& frame_id );
+    void setProcessTimeMsg(local_planner::Profiling& msg, const std::string& frame_id );
 
 private:
 	ros::Time start_time_, split_time_;

@@ -4,7 +4,7 @@
 #include "local_planner/stopwatch.h"
 
 // in rovio the custom msg was in <>
-#include <local_planner/ProcessTime.h>
+#include <local_planner/Profiling.h>
 #include <ecl/time.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -27,11 +27,8 @@ int main(int argc, char** argv) {
 
   std::thread worker(&LocalPlannerNode::threadFunction, &Node);
   
-  // add stuff to stop time
-  ecl::StopWatch stopwatch1;
-  ecl::StopWatch stopwatch2;
-  ecl::Duration stopwatch1_duration;
-  int stopwatch1_counter = 0;
+  StopWatch updatePlannerInfo_sw;
+  StopWatch setPlannerInfo_sw;
 
   // spin node, execute callbacks
   while (ros::ok()) {
@@ -109,31 +106,46 @@ int main(int argc, char** argv) {
         Node.cameras_.size() != 0) {
       if (Node.canUpdatePlannerInfo()) {
         if (Node.running_mutex_.try_lock()) {
-          //todo: insert start time updatePlannerInfo_time
-          local_planner::ProcessTime updatePlannerInfo_msg;
+          
+          local_planner::Profiling updatePlannerInfo_msg;
           std::string frame_id = "/local_planner_node_main";
-          stopwatch1.restart();
+          ecl::StopWatch stopwatch1;
           
           Node.updatePlannerInfo();
-          stopwatch1_counter++;
-          stopwatch1_duration = stopwatch1.elapsed();
+
+          ecl::Duration stopwatch1_duration = stopwatch1.elapsed();
           updatePlannerInfo_msg.header.frame_id = frame_id;
+          updatePlannerInfo_msg.header.stamp = ros::Time::now();
           updatePlannerInfo_msg.function_name = "updatePlannerInfo";
           updatePlannerInfo_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
-          updatePlannerInfo_msg.counter = stopwatch1_counter;
+          updatePlannerInfo_msg.counter+=1;
           Node.duration_measurement_pub_.publish(updatePlannerInfo_msg);
+          updatePlannerInfo_sw.total_duration_+=updatePlannerInfo_msg.duration;
+
+
           // reset all clouds to not yet received
           for (size_t i = 0; i < Node.cameras_.size(); i++) {
             Node.cameras_[i].received_ = false;
           }
           // check how long the wp generator update takes
-
+          local_planner::Profiling setPlannerInfo_msg;
+          stopwatch1.restart();
           Node.wp_generator_->setPlannerInfo(
             // checkout how long it takes to get the avoidance output
               Node.local_planner_->getAvoidanceOutput()
               // end avoidance output
               );
-          // end wp generator
+          stopwatch1_duration = stopwatch1.elapsed();
+
+          setPlannerInfo_msg.header.frame_id = frame_id;
+          setPlannerInfo_msg.header.stamp = ros::Time::now();
+          setPlannerInfo_msg.function_name = "setPlannerInfo";
+          setPlannerInfo_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
+          setPlannerInfo_msg.counter+=1;
+          Node.duration_measurement_pub_.publish(setPlannerInfo_msg);
+          setPlannerInfo_sw.total_duration_+=setPlannerInfo_msg.duration;
+
+
           if (Node.local_planner_->stop_in_front_active_) {
             Node.goal_msg_.pose.position = Node.local_planner_->getGoal();
           }
