@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
         ros::Duration(Node.local_planner_->pointcloud_timeout_hover_);
     ros::Duration since_last_cloud = now - Node.last_wp_time_;
     ros::Duration since_start = now - start_time;
+    std::cout << "since start " << since_start << std::endl;
 
     if (since_last_cloud > pointcloud_timeout_land &&
         since_start > pointcloud_timeout_land) {
@@ -117,7 +118,7 @@ int main(int argc, char** argv) {
           //stopwatch1.counter_++;
           stopwatch2.counter_++;
           //updatePlannerInfo_time = stopwatch1.elapsed();
-          uint64_t duration = stopwatch2.elapsed();
+          ros::Duration duration = stopwatch2.elapsed();
 
           //stopwatch2.timings_.push_back(duration); 
           stopwatch2.setProcessTimeMsg(updatePlannerInfo_msg, frame_id);
@@ -138,7 +139,7 @@ int main(int argc, char** argv) {
               );
           stopwatch1.counter_++;
           //updatePlannerInfo_time = stopwatch1.elapsed();
-          uint64_t duration1 = stopwatch1.elapsed();
+          ros::Duration duration1 = stopwatch1.elapsed();
 
           //stopwatch2.timings_.push_back(duration); 
           stopwatch1.setProcessTimeMsg(updatePlannerInfo_msg, frame_id);
