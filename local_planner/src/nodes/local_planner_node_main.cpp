@@ -5,6 +5,7 @@
 
 // in rovio the custom msg was in <>
 #include <local_planner/ProcessTime.h>
+#include <ecl/time.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -27,8 +28,10 @@ int main(int argc, char** argv) {
   std::thread worker(&LocalPlannerNode::threadFunction, &Node);
   
   // add stuff to stop time
-  StopWatch stopwatch1;
-  StopWatch stopwatch2;
+  ecl::StopWatch stopwatch1;
+  ecl::StopWatch stopwatch2;
+  ecl::Duration stopwatch1_duration;
+  int stopwatch1_counter = 0;
 
   // spin node, execute callbacks
   while (ros::ok()) {
@@ -56,7 +59,6 @@ int main(int argc, char** argv) {
         ros::Duration(Node.local_planner_->pointcloud_timeout_hover_);
     ros::Duration since_last_cloud = now - Node.last_wp_time_;
     ros::Duration since_start = now - start_time;
-    std::cout << "since start " << since_start << std::endl;
 
     if (since_last_cloud > pointcloud_timeout_land &&
         since_start > pointcloud_timeout_land) {
@@ -110,42 +112,27 @@ int main(int argc, char** argv) {
           //todo: insert start time updatePlannerInfo_time
           local_planner::ProcessTime updatePlannerInfo_msg;
           std::string frame_id = "/local_planner_node_main";
-          stopwatch2.function_name_ = "updatePlannerInfo";
-          //uint64_t updatePlannerInfo_time = stopwatch1.split();
-          stopwatch2.restart();
+          stopwatch1.restart();
           
           Node.updatePlannerInfo();
-          //stopwatch1.counter_++;
-          stopwatch2.counter_++;
-          //updatePlannerInfo_time = stopwatch1.elapsed();
-          ros::Duration duration = stopwatch2.elapsed();
-
-          //stopwatch2.timings_.push_back(duration); 
-          stopwatch2.setProcessTimeMsg(updatePlannerInfo_msg, frame_id);
-          //std::cout << "updatePlannerInfo1 took " << updatePlannerInfo_time  << std::endl;
-          std::cout << "updatePlannerInfo2 took " << duration  << std::endl;
+          stopwatch1_counter++;
+          stopwatch1_duration = stopwatch1.elapsed();
+          updatePlannerInfo_msg.header.frame_id = frame_id;
+          updatePlannerInfo_msg.function_name = "updatePlannerInfo";
+          updatePlannerInfo_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
+          updatePlannerInfo_msg.counter = stopwatch1_counter;
           Node.duration_measurement_pub_.publish(updatePlannerInfo_msg);
           // reset all clouds to not yet received
           for (size_t i = 0; i < Node.cameras_.size(); i++) {
             Node.cameras_[i].received_ = false;
           }
           // check how long the wp generator update takes
-          stopwatch1.function_name_ = "setPlannerInfo";
-          stopwatch1.restart();
+
           Node.wp_generator_->setPlannerInfo(
             // checkout how long it takes to get the avoidance output
               Node.local_planner_->getAvoidanceOutput()
               // end avoidance output
               );
-          stopwatch1.counter_++;
-          //updatePlannerInfo_time = stopwatch1.elapsed();
-          ros::Duration duration1 = stopwatch1.elapsed();
-
-          //stopwatch2.timings_.push_back(duration); 
-          stopwatch1.setProcessTimeMsg(updatePlannerInfo_msg, frame_id);
-          //std::cout << "updatePlannerInfo1 took " << updatePlannerInfo_time  << std::endl;
-          std::cout << "updatePlannerInfo2 took " << duration1  << std::endl;
-          Node.duration_measurement_pub_.publish(updatePlannerInfo_msg);
           // end wp generator
           if (Node.local_planner_->stop_in_front_active_) {
             Node.goal_msg_.pose.position = Node.local_planner_->getGoal();

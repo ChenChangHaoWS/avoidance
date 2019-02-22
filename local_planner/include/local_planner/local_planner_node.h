@@ -34,6 +34,7 @@
 
 // time stuff
 #include <local_planner/ProcessTime.h>
+#include <ecl/time.hpp>
 
 #include <dynamic_reconfigure/server.h>
 #include <local_planner/LocalPlannerNodeConfig.h>
