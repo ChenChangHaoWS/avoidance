@@ -25,7 +25,21 @@ int main(int argc, char** argv) {
   bool callPx4Params = true;
   Node.status_msg_.state = (int)MAV_STATE::MAV_STATE_BOOT;
 
+  StopWatch threadFunction_sw;
+  std::string frame_id = "/local_planner_node_main";
+  ecl::StopWatch stopwatch0;
+  local_planner::Profiling threadFunction_msg;
+  
   std::thread worker(&LocalPlannerNode::threadFunction, &Node);
+
+  ecl::Duration stopwatch0_duration = stopwatch0.elapsed();
+  threadFunction_msg.header.frame_id = frame_id;
+  threadFunction_msg.header.stamp = ros::Time::now();
+  threadFunction_msg.function_name = "threadFunction";
+  threadFunction_msg.duration = static_cast<ros::Duration>(stopwatch0_duration);
+  threadFunction_msg.counter+=1;
+  Node.duration_measurement_pub_.publish(threadFunction_msg);
+  threadFunction_sw.total_duration_+=threadFunction_msg.duration;
   
   StopWatch updatePlannerInfo_sw;
   StopWatch setPlannerInfo_sw;
@@ -108,7 +122,6 @@ int main(int argc, char** argv) {
         if (Node.running_mutex_.try_lock()) {
           
           local_planner::Profiling updatePlannerInfo_msg;
-          std::string frame_id = "/local_planner_node_main";
           ecl::StopWatch stopwatch1;
           
           Node.updatePlannerInfo();

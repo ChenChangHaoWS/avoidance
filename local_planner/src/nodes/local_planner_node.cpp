@@ -992,6 +992,8 @@ void LocalPlannerNode::threadFunction() {
       std::lock_guard<std::mutex> guard(running_mutex_);
       never_run_ = false;
       std::clock_t start_time = std::clock();
+
+      
       local_planner_->runPlanner();
       publishPlannerData();
 

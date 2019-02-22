@@ -8,6 +8,11 @@
 #include "cost_parameters.h"
 #include "histogram.h"
 
+#include "stopwatch.h"
+
+#include <local_planner/Profiling.h>
+#include <ecl/time.hpp>
+
 #include <dynamic_reconfigure/server.h>
 #include <local_planner/LocalPlannerNodeConfig.h>
 
@@ -41,6 +46,9 @@ class TreeNode;
 
 class LocalPlanner {
  private:
+
+  ros::NodeHandle nh_;
+  
   bool use_back_off_;
   bool use_VFH_star_;
   bool adapt_cost_params_;
@@ -110,6 +118,8 @@ class LocalPlanner {
   Eigen::MatrixXf cost_matrix_;
   std::vector<candidateDirection> candidate_vector_;
 
+  std::string profiling_frame_id_ = "/../../local_planner";
+
   /**
   * @brief     reprojectes the histogram from the previous algorithm iteration
   *around the current vehicle position
@@ -173,6 +183,10 @@ class LocalPlanner {
   geometry_msgs::PoseStamped offboard_pose_;
   sensor_msgs::LaserScan distance_data_ = {};
   geometry_msgs::Point last_sent_waypoint_;
+
+  StopWatch calculateFOV_sw_;
+
+  ros::Publisher duration_measurement_pub_;
 
   // complete_cloud_ contains n complete clouds from the cameras
   std::vector<pcl::PointCloud<pcl::PointXYZ>> complete_cloud_;

@@ -9,7 +9,11 @@
 
 namespace avoidance {
 
-LocalPlanner::LocalPlanner() : star_planner_(new StarPlanner()) {}
+LocalPlanner::LocalPlanner() : star_planner_(new StarPlanner()) {
+
+  nh_ = ros::NodeHandle("~");
+  duration_measurement_pub_ = nh_.advertise<local_planner::Profiling>("/performance_check", 1);
+}
 
 LocalPlanner::~LocalPlanner() {}
 
@@ -116,9 +120,21 @@ void LocalPlanner::runPlanner() {
   double roll, pitch, yaw;
   m.getRPY(roll, pitch, yaw);
   z_FOV_idx_.clear();
+
+  ecl::StopWatch stopwatch; 
+  local_planner::Profiling calculateFOV_msg; 
   calculateFOV(h_FOV_, v_FOV_, z_FOV_idx_, e_FOV_min_, e_FOV_max_,
                static_cast<float>(yaw), static_cast<float>(pitch));
-
+  ecl::Duration stopwatch_duration = stopwatch.elapsed();
+  calculateFOV_msg.header.frame_id = profiling_frame_id_;
+  calculateFOV_msg.header.stamp = ros::Time::now();
+  calculateFOV_msg.function_name = "calculateFOV";
+  calculateFOV_msg.duration = static_cast<ros::Duration>(stopwatch_duration);
+  calculateFOV_sw_.counter_+=1;
+  calculateFOV_msg.counter = calculateFOV_sw_.counter_;
+  duration_measurement_pub_.publish(calculateFOV_msg);
+  calculateFOV_sw_.total_duration_+=calculateFOV_msg.duration;
+  
   histogram_box_.setBoxLimits(pose_.pose.position, ground_distance_);
 
   filterPointCloud(final_cloud_, closest_point_, distance_to_closest_point_,
