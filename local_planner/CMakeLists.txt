@@ -12,13 +12,16 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   tf
   pcl_ros
+  ecl_time
   mavros
   mavros_extras
   mavros_msgs
   mavlink
+  message_generation
 )
 find_package(PCL 1.7 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -66,6 +69,15 @@ find_package(yaml-cpp REQUIRED)
 #   Action1.action
 #   Action2.action
 # )
+add_message_files(
+  FILES
+  ProcessTime.msg
+)
+
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -97,7 +109,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp rospy std_msgs mavros_msgs geometry_msgs mav_msgs sensor_msgs message_runtime tf
+  CATKIN_DEPENDS roscpp rospy std_msgs mavros_msgs geometry_msgs mav_msgs sensor_msgs message_runtime tf 
 #  DEPENDS system_lib
 )
 
@@ -135,6 +147,7 @@ add_library(local_planner
   src/nodes/planner_functions.cpp
   src/nodes/common.cpp
   src/nodes/rviz_world_loader.cpp
+  src/nodes/stopwatch.cpp
 )
 
 ## Add cmake target dependencies of the library
