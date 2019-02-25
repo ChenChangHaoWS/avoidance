@@ -5,7 +5,6 @@
 #include "local_planner/tree_node.h"
 #include "local_planner/waypoint_generator.h"
 
-
 #include <boost/algorithm/string.hpp>
 
 #include <atomic>
@@ -116,8 +115,8 @@ LocalPlannerNode::LocalPlannerNode() {
   get_px4_param_client_ =
       nh_.serviceClient<mavros_msgs::ParamGet>("/mavros/param/get");
 
-
-  duration_measurement_pub_ = nh_.advertise<local_planner::Profiling>("/performance_check", 1);
+  duration_measurement_pub_ =
+      nh_.advertise<local_planner::Profiling>("/performance_check", 1);
 
   local_planner_->applyGoal();
 }
@@ -218,32 +217,30 @@ void LocalPlannerNode::updatePlannerInfo() {
   }
 
   local_planner::Profiling setPose_msg;
-  std::string frame_id = "/../local_planner_node";
   ecl::StopWatch stopwatch1;
 
   // update position
   local_planner_->setPose(newest_pose_);
   ecl::Duration stopwatch1_duration = stopwatch1.elapsed();
-  setPose_msg.header.frame_id = frame_id;
-  setPose_msg.header.stamp = ros::Time::now();
-  setPose_msg.function_name = "setPose";
-  setPose_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
-  setPose_msg.counter+=1;
+  setPose_sw_.counter_ += 1;
+  setProfilingMsg(setPose_msg, profiling_frame_id_, "setPose",
+                  static_cast<ros::Duration>(stopwatch1_duration),
+                  setPose_sw_.counter_);
   duration_measurement_pub_.publish(setPose_msg);
-  setPose_sw_.total_duration_+=setPose_msg.duration;
+  setPose_sw_.total_duration_ += setPose_msg.duration;
 
   local_planner::Profiling setCurrentVelocity_msg;
   stopwatch1.restart();
   // Update velocity
   local_planner_->setCurrentVelocity(vel_msg_);
   stopwatch1_duration = stopwatch1.elapsed();
-  setCurrentVelocity_msg.header.frame_id = frame_id;
-  setCurrentVelocity_msg.header.stamp = ros::Time::now();
-  setCurrentVelocity_msg.function_name = "setCurrentVelocity";
-  setCurrentVelocity_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
-  setCurrentVelocity_msg.counter+=1;
+  setCurrentVelocity_sw_.counter_ += 1;
+  setProfilingMsg(setCurrentVelocity_msg, profiling_frame_id_,
+                  "setCurrentVelocity",
+                  static_cast<ros::Duration>(stopwatch1_duration),
+                  setCurrentVelocity_sw_.counter_);
   duration_measurement_pub_.publish(setCurrentVelocity_msg);
-  setCurrentVelocity_sw_.total_duration_+=setCurrentVelocity_msg.duration;
+  setCurrentVelocity_sw_.total_duration_ += setCurrentVelocity_msg.duration;
 
   // update state
   local_planner_->currently_armed_ = armed_;
@@ -993,7 +990,6 @@ void LocalPlannerNode::threadFunction() {
       never_run_ = false;
       std::clock_t start_time = std::clock();
 
-      
       local_planner_->runPlanner();
       publishPlannerData();
 

@@ -10,9 +10,9 @@
 namespace avoidance {
 
 LocalPlanner::LocalPlanner() : star_planner_(new StarPlanner()) {
-
   nh_ = ros::NodeHandle("~");
-  duration_measurement_pub_ = nh_.advertise<local_planner::Profiling>("/performance_check", 1);
+  duration_measurement_pub_ =
+      nh_.advertise<local_planner::Profiling>("/performance_check", 1);
 }
 
 LocalPlanner::~LocalPlanner() {}
@@ -121,22 +121,21 @@ void LocalPlanner::runPlanner() {
   m.getRPY(roll, pitch, yaw);
   z_FOV_idx_.clear();
 
-  ecl::StopWatch stopwatch; 
-  local_planner::Profiling calculateFOV_msg; 
+  ecl::StopWatch stopwatch;
+  local_planner::Profiling calculateFOV_msg;
   calculateFOV(h_FOV_, v_FOV_, z_FOV_idx_, e_FOV_min_, e_FOV_max_,
                static_cast<float>(yaw), static_cast<float>(pitch));
   ecl::Duration stopwatch_duration = stopwatch.elapsed();
-  calculateFOV_msg.header.frame_id = profiling_frame_id_;
-  calculateFOV_msg.header.stamp = ros::Time::now();
-  calculateFOV_msg.function_name = "calculateFOV";
-  calculateFOV_msg.duration = static_cast<ros::Duration>(stopwatch_duration);
-  calculateFOV_sw_.counter_+=1;
+  calculateFOV_sw_.counter_ += 1;
+  setProfilingMsg(calculateFOV_msg, profiling_frame_id_, "calculateFOV",
+                  static_cast<ros::Duration>(stopwatch_duration),
+                  calculateFOV_sw_.counter_);
   calculateFOV_msg.counter = calculateFOV_sw_.counter_;
   duration_measurement_pub_.publish(calculateFOV_msg);
-  calculateFOV_sw_.total_duration_+=calculateFOV_msg.duration;
-  
+  calculateFOV_sw_.total_duration_ += calculateFOV_msg.duration;
+
   histogram_box_.setBoxLimits(pose_.pose.position, ground_distance_);
-  
+
   local_planner::Profiling filterPointCloud_msg;
   stopwatch.restart();
   filterPointCloud(final_cloud_, closest_point_, distance_to_closest_point_,
@@ -144,27 +143,25 @@ void LocalPlanner::runPlanner() {
                    min_cloud_size_, min_dist_backoff_, histogram_box_,
                    toEigen(pose_.pose.position), min_realsense_dist_);
   stopwatch_duration = stopwatch.elapsed();
-  filterPointCloud_msg.header.frame_id = profiling_frame_id_;
-  filterPointCloud_msg.header.stamp = ros::Time::now();
-  filterPointCloud_msg.function_name = "filterPointCloud";
-  filterPointCloud_msg.duration = static_cast<ros::Duration>(stopwatch_duration);
-  filterPointCloud_sw_.counter_+=1;
-  filterPointCloud_msg.counter = filterPointCloud_sw_.counter_;
+  filterPointCloud_sw_.counter_ += 1;
+  setProfilingMsg(filterPointCloud_msg, profiling_frame_id_, "filterPointCloud",
+                  static_cast<ros::Duration>(stopwatch_duration),
+                  filterPointCloud_sw_.counter_);
   duration_measurement_pub_.publish(filterPointCloud_msg);
-  filterPointCloud_sw_.total_duration_+=filterPointCloud_msg.duration;
-  
+  filterPointCloud_sw_.total_duration_ += filterPointCloud_msg.duration;
+
   local_planner::Profiling determineStrategy_msg;
   stopwatch.restart();
   determineStrategy();
   stopwatch_duration = stopwatch.elapsed();
-  determineStrategy_msg.header.frame_id = profiling_frame_id_;
-  determineStrategy_msg.header.stamp = ros::Time::now();
-  determineStrategy_msg.function_name = "determineStrategy";
-  determineStrategy_msg.duration = static_cast<ros::Duration>(stopwatch_duration);
-  determineStrategy_sw_.counter_+=1;
+  determineStrategy_sw_.counter_ += 1;
+  setProfilingMsg(determineStrategy_msg, profiling_frame_id_,
+                  "determineStrategy",
+                  static_cast<ros::Duration>(stopwatch_duration),
+                  determineStrategy_sw_.counter_);
   determineStrategy_msg.counter = determineStrategy_sw_.counter_;
   duration_measurement_pub_.publish(determineStrategy_msg);
-  determineStrategy_sw_.total_duration_+=determineStrategy_msg.duration;
+  determineStrategy_sw_.total_duration_ += determineStrategy_msg.duration;
 }
 
 void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
@@ -217,7 +214,9 @@ sensor_msgs::Image LocalPlanner::generateHistogramImage(Histogram &histogram) {
 
 void LocalPlanner::determineStrategy() {
   star_planner_->tree_age_++;
-
+  ecl::StopWatch stopwatch;
+  ecl::Duration stopwatch_duration = 0;
+  local_planner::Profiling create2DObstacleRepresentation_msg;
   if (disable_rise_to_goal_altitude_) {
     reach_altitude_ = true;
   }
@@ -236,18 +235,56 @@ void LocalPlanner::determineStrategy() {
     }
 
     if (send_obstacles_fcu_) {
+      
+      stopwatch.restart();
       create2DObstacleRepresentation(true);
+      stopwatch_duration = stopwatch.elapsed();
+      create2DObstacleRepresentation_sw_.counter_ += 1;
+      setProfilingMsg(create2DObstacleRepresentation_msg, profiling_frame_id_,
+                      "create2DObstacleRepresentation",
+                      static_cast<ros::Duration>(stopwatch_duration),
+                      create2DObstacleRepresentation_sw_.counter_);
+      create2DObstacleRepresentation_msg.counter =
+          create2DObstacleRepresentation_sw_.counter_;
+      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.total_duration_ +=
+          create2DObstacleRepresentation_msg.duration;
     }
   } else if (final_cloud_.points.size() > min_cloud_size_ && stop_in_front_ &&
              reach_altitude_) {
     obstacle_ = true;
     ROS_INFO(
         "\033[1;35m[OA] There is an Obstacle Ahead stop in front\n \033[0m");
+    local_planner::Profiling stopInFrontObstacles_msg;
+    stopwatch.restart();
     stopInFrontObstacles();
+    stopwatch_duration = stopwatch.elapsed();
+    stopInFrontObstacles_sw_.counter_ += 1;
+    setProfilingMsg(stopInFrontObstacles_msg, profiling_frame_id_,
+                    "stopInFrontObstacles",
+                    static_cast<ros::Duration>(stopwatch_duration),
+                    stopInFrontObstacles_sw_.counter_);
+    stopInFrontObstacles_msg.counter = stopInFrontObstacles_sw_.counter_;
+    duration_measurement_pub_.publish(stopInFrontObstacles_msg);
+    stopInFrontObstacles_sw_.total_duration_ +=
+        stopInFrontObstacles_msg.duration;
+
     waypoint_type_ = direct;
 
     if (send_obstacles_fcu_) {
+      stopwatch.restart();
       create2DObstacleRepresentation(true);
+      stopwatch_duration = stopwatch.elapsed();
+      create2DObstacleRepresentation_sw_.counter_ += 1;
+      setProfilingMsg(create2DObstacleRepresentation_msg, profiling_frame_id_,
+                      "create2DObstacleRepresentation",
+                      static_cast<ros::Duration>(stopwatch_duration),
+                      create2DObstacleRepresentation_sw_.counter_);
+      create2DObstacleRepresentation_msg.counter =
+          create2DObstacleRepresentation_sw_.counter_;
+      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.total_duration_ +=
+          create2DObstacleRepresentation_msg.duration;
     }
   } else {
     if (((counter_close_points_backoff_ > 200 &&
@@ -266,13 +303,37 @@ void LocalPlanner::determineStrategy() {
       }
       waypoint_type_ = goBack;
       if (send_obstacles_fcu_) {
-        create2DObstacleRepresentation(true);
+        stopwatch.restart();
+      create2DObstacleRepresentation(true);
+      stopwatch_duration = stopwatch.elapsed();
+      create2DObstacleRepresentation_sw_.counter_ += 1;
+      setProfilingMsg(create2DObstacleRepresentation_msg, profiling_frame_id_,
+                      "create2DObstacleRepresentation",
+                      static_cast<ros::Duration>(stopwatch_duration),
+                      create2DObstacleRepresentation_sw_.counter_);
+      create2DObstacleRepresentation_msg.counter =
+          create2DObstacleRepresentation_sw_.counter_;
+      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.total_duration_ +=
+          create2DObstacleRepresentation_msg.duration;
       }
 
     } else {
       evaluateProgressRate();
 
+      stopwatch.restart();
       create2DObstacleRepresentation(send_obstacles_fcu_);
+      stopwatch_duration = stopwatch.elapsed();
+      create2DObstacleRepresentation_sw_.counter_ += 1;
+      setProfilingMsg(create2DObstacleRepresentation_msg, profiling_frame_id_,
+                      "create2DObstacleRepresentation",
+                      static_cast<ros::Duration>(stopwatch_duration),
+                      create2DObstacleRepresentation_sw_.counter_);
+      create2DObstacleRepresentation_msg.counter =
+          create2DObstacleRepresentation_sw_.counter_;
+      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.total_duration_ +=
+          create2DObstacleRepresentation_msg.duration;
 
       // check histogram relevance
       bool hist_relevant = true;

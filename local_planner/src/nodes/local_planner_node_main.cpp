@@ -1,14 +1,13 @@
 #include "local_planner/local_planner.h"
 #include "local_planner/local_planner_node.h"
-#include "local_planner/waypoint_generator.h"
 #include "local_planner/stopwatch.h"
+#include "local_planner/waypoint_generator.h"
 
 // in rovio the custom msg was in <>
 #include <local_planner/Profiling.h>
 #include <ecl/time.hpp>
 
 #include <boost/algorithm/string.hpp>
-
 
 int main(int argc, char** argv) {
   using namespace avoidance;
@@ -29,18 +28,17 @@ int main(int argc, char** argv) {
   std::string frame_id = "/local_planner_node_main";
   ecl::StopWatch stopwatch0;
   local_planner::Profiling threadFunction_msg;
-  
+
   std::thread worker(&LocalPlannerNode::threadFunction, &Node);
 
   ecl::Duration stopwatch0_duration = stopwatch0.elapsed();
-  threadFunction_msg.header.frame_id = frame_id;
-  threadFunction_msg.header.stamp = ros::Time::now();
-  threadFunction_msg.function_name = "threadFunction";
-  threadFunction_msg.duration = static_cast<ros::Duration>(stopwatch0_duration);
-  threadFunction_msg.counter+=1;
+  threadFunction_sw.counter_ += 1;
+  setProfilingMsg(threadFunction_msg, frame_id, "threadFunction",
+                  static_cast<ros::Duration>(stopwatch0_duration),
+                  threadFunction_sw.counter_);
   Node.duration_measurement_pub_.publish(threadFunction_msg);
-  threadFunction_sw.total_duration_+=threadFunction_msg.duration;
-  
+  threadFunction_sw.total_duration_ += threadFunction_msg.duration;
+
   StopWatch updatePlannerInfo_sw;
   StopWatch setPlannerInfo_sw;
 
@@ -120,21 +118,21 @@ int main(int argc, char** argv) {
         Node.cameras_.size() != 0) {
       if (Node.canUpdatePlannerInfo()) {
         if (Node.running_mutex_.try_lock()) {
-          
           local_planner::Profiling updatePlannerInfo_msg;
           ecl::StopWatch stopwatch1;
-          
+
           Node.updatePlannerInfo();
 
           ecl::Duration stopwatch1_duration = stopwatch1.elapsed();
-          updatePlannerInfo_msg.header.frame_id = frame_id;
-          updatePlannerInfo_msg.header.stamp = ros::Time::now();
-          updatePlannerInfo_msg.function_name = "updatePlannerInfo";
-          updatePlannerInfo_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
-          updatePlannerInfo_msg.counter+=1;
+          updatePlannerInfo_msg.duration =
+              static_cast<ros::Duration>(stopwatch1_duration);
+          updatePlannerInfo_sw.counter_ += 1;
+          setProfilingMsg(updatePlannerInfo_msg, frame_id, "updatePlannerInfo",
+                          static_cast<ros::Duration>(stopwatch1_duration),
+                          updatePlannerInfo_sw.counter_);
           Node.duration_measurement_pub_.publish(updatePlannerInfo_msg);
-          updatePlannerInfo_sw.total_duration_+=updatePlannerInfo_msg.duration;
-
+          updatePlannerInfo_sw.total_duration_ +=
+              updatePlannerInfo_msg.duration;
 
           // reset all clouds to not yet received
           for (size_t i = 0; i < Node.cameras_.size(); i++) {
@@ -144,20 +142,17 @@ int main(int argc, char** argv) {
           local_planner::Profiling setPlannerInfo_msg;
           stopwatch1.restart();
           Node.wp_generator_->setPlannerInfo(
-            // checkout how long it takes to get the avoidance output
+              // checkout how long it takes to get the avoidance output
               Node.local_planner_->getAvoidanceOutput()
               // end avoidance output
               );
           stopwatch1_duration = stopwatch1.elapsed();
-
-          setPlannerInfo_msg.header.frame_id = frame_id;
-          setPlannerInfo_msg.header.stamp = ros::Time::now();
-          setPlannerInfo_msg.function_name = "setPlannerInfo";
-          setPlannerInfo_msg.duration = static_cast<ros::Duration>(stopwatch1_duration);
-          setPlannerInfo_msg.counter+=1;
+          setPlannerInfo_sw.counter_ += 1;
+          setProfilingMsg(setPlannerInfo_msg, frame_id, "setPlannerInfo",
+                          static_cast<ros::Duration>(stopwatch1_duration),
+                          setPlannerInfo_sw.counter_);
           Node.duration_measurement_pub_.publish(setPlannerInfo_msg);
-          setPlannerInfo_sw.total_duration_+=setPlannerInfo_msg.duration;
-
+          setPlannerInfo_sw.total_duration_ += setPlannerInfo_msg.duration;
 
           if (Node.local_planner_->stop_in_front_active_) {
             Node.goal_msg_.pose.position = Node.local_planner_->getGoal();
@@ -192,7 +187,6 @@ int main(int argc, char** argv) {
       Node.t_status_sent_ = now;
     }
   }
-
 
   Node.should_exit_ = true;
   Node.data_ready_cv_.notify_all();

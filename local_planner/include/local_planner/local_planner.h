@@ -46,9 +46,8 @@ class TreeNode;
 
 class LocalPlanner {
  private:
-
   ros::NodeHandle nh_;
-  
+
   bool use_back_off_;
   bool use_VFH_star_;
   bool adapt_cost_params_;
@@ -187,6 +186,8 @@ class LocalPlanner {
   StopWatch calculateFOV_sw_;
   StopWatch filterPointCloud_sw_;
   StopWatch determineStrategy_sw_;
+  StopWatch create2DObstacleRepresentation_sw_;
+  StopWatch stopInFrontObstacles_sw_;
 
   ros::Publisher duration_measurement_pub_;
 

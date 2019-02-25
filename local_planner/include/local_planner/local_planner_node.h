@@ -276,6 +276,7 @@ class LocalPlannerNode {
   dynamic_reconfigure::Server<avoidance::LocalPlannerNodeConfig>* server_;
   boost::recursive_mutex config_mutex_;
 
+  std::string profiling_frame_id_ = "/../local_planner_node";
   /**
   * @brief     callaback for parameters dynamic reconfigure server
   * @param     config, struct with all the parameters
