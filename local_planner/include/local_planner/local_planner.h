@@ -185,6 +185,8 @@ class LocalPlanner {
   geometry_msgs::Point last_sent_waypoint_;
 
   StopWatch calculateFOV_sw_;
+  StopWatch filterPointCloud_sw_;
+  StopWatch determineStrategy_sw_;
 
   ros::Publisher duration_measurement_pub_;
 

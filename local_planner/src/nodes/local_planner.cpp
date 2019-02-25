@@ -136,13 +136,35 @@ void LocalPlanner::runPlanner() {
   calculateFOV_sw_.total_duration_+=calculateFOV_msg.duration;
   
   histogram_box_.setBoxLimits(pose_.pose.position, ground_distance_);
-
+  
+  local_planner::Profiling filterPointCloud_msg;
+  stopwatch.restart();
   filterPointCloud(final_cloud_, closest_point_, distance_to_closest_point_,
                    counter_close_points_backoff_, complete_cloud_,
                    min_cloud_size_, min_dist_backoff_, histogram_box_,
                    toEigen(pose_.pose.position), min_realsense_dist_);
-
+  stopwatch_duration = stopwatch.elapsed();
+  filterPointCloud_msg.header.frame_id = profiling_frame_id_;
+  filterPointCloud_msg.header.stamp = ros::Time::now();
+  filterPointCloud_msg.function_name = "filterPointCloud";
+  filterPointCloud_msg.duration = static_cast<ros::Duration>(stopwatch_duration);
+  filterPointCloud_sw_.counter_+=1;
+  filterPointCloud_msg.counter = filterPointCloud_sw_.counter_;
+  duration_measurement_pub_.publish(filterPointCloud_msg);
+  filterPointCloud_sw_.total_duration_+=filterPointCloud_msg.duration;
+  
+  local_planner::Profiling determineStrategy_msg;
+  stopwatch.restart();
   determineStrategy();
+  stopwatch_duration = stopwatch.elapsed();
+  determineStrategy_msg.header.frame_id = profiling_frame_id_;
+  determineStrategy_msg.header.stamp = ros::Time::now();
+  determineStrategy_msg.function_name = "determineStrategy";
+  determineStrategy_msg.duration = static_cast<ros::Duration>(stopwatch_duration);
+  determineStrategy_sw_.counter_+=1;
+  determineStrategy_msg.counter = determineStrategy_sw_.counter_;
+  duration_measurement_pub_.publish(determineStrategy_msg);
+  determineStrategy_sw_.total_duration_+=determineStrategy_msg.duration;
 }
 
 void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
