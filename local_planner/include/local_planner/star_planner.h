@@ -5,6 +5,11 @@
 #include "cost_parameters.h"
 #include "histogram.h"
 
+#include "stopwatch.h"
+
+#include <local_planner/Profiling.h>
+#include <ecl/time.hpp>
+
 #include <Eigen/Dense>
 
 #include <pcl/point_cloud.h>
@@ -24,6 +29,8 @@ namespace avoidance {
 class TreeNode;
 
 class StarPlanner {
+  ros::NodeHandle nh_;
+
   float h_FOV_ = 59.0f;
   float v_FOV_ = 46.0f;
   int children_per_node_ = 1;
@@ -41,6 +48,9 @@ class StarPlanner {
   Eigen::Vector3f goal_;
   geometry_msgs::PoseStamped pose_;
   costParameters cost_params_;
+
+  std::string profiling_frame_id_buildTree_ =
+      "/../../rPlanner/dStrategy/buildLookAheadTree";
 
  protected:
   /**
@@ -119,6 +129,17 @@ class StarPlanner {
   **/
   void dynamicReconfigureSetStarParams(
       const avoidance::LocalPlannerNodeConfig& config, uint32_t level);
+
+  StopWatch calculateFOV_sw_;
+  StopWatch propagateHistogram_sw_;
+  StopWatch generateNewHistogram_sw_;
+  StopWatch combinedHistogram_sw_;
+  StopWatch getCostMatrix_sw_;
+  StopWatch getBestCand_sw_;
+  StopWatch findBestNode_sw_;
+  StopWatch treeCostFunction_sw_;
+
+  ros::Publisher duration_measurement_pub_;
 };
 }
 #endif  // STAR_PLANNER_H

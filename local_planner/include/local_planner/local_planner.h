@@ -116,8 +116,11 @@ class LocalPlanner {
   Histogram to_fcu_histogram_ = Histogram(ALPHA_RES);
   Eigen::MatrixXf cost_matrix_;
   std::vector<candidateDirection> candidate_vector_;
+
   std::string profiling_frame_id_rP_ = "/../../runPlanner";
   std::string profiling_frame_id_dS_ = "/../../runPlanner/determineStrategy";
+  std::string profiling_frame_id_2D_ =
+      "/../../runPlanner/determineStrategy/create2DObstacleRepresentation";
   /**
   * @brief     reprojectes the histogram from the previous algorithm iteration
   *around the current vehicle position
@@ -189,6 +192,15 @@ class LocalPlanner {
   StopWatch stopInFrontObstacles_sw_;
   StopWatch evaluateProgressRate_sw_;
   StopWatch histRelCheck_sw_;
+  StopWatch getCostMatrix_sw_;
+  StopWatch getBestCand_sw_;
+  StopWatch reprojectPoints_sw_;
+  StopWatch propagateHistogram_sw_;
+  StopWatch generateNewHistogram_sw_;
+  StopWatch combinedHistogram_sw_;
+  StopWatch compressHistogramElevation_sw_;
+  StopWatch updateObstacleDistanceMsg_sw_;
+  StopWatch buildLookAheadTree_sw_;
 
   ros::Publisher duration_measurement_pub_;
 
