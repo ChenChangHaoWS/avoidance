@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
 
   StopWatch updatePlannerInfo_sw;
   StopWatch setPlannerInfo_sw;
+  StopWatch publishWaypoints_sw;
 
   // spin node, execute callbacks
   while (ros::ok()) {
@@ -124,8 +125,6 @@ int main(int argc, char** argv) {
           Node.updatePlannerInfo();
 
           ecl::Duration stopwatch1_duration = stopwatch1.elapsed();
-          updatePlannerInfo_msg.duration =
-              static_cast<ros::Duration>(stopwatch1_duration);
           updatePlannerInfo_sw.counter_ += 1;
           setProfilingMsg(updatePlannerInfo_msg, frame_id, "updatePlannerInfo",
                           static_cast<ros::Duration>(stopwatch1_duration),
@@ -168,7 +167,18 @@ int main(int argc, char** argv) {
 
     // send waypoint
     if (!Node.never_run_ && !landing) {
+      local_planner::Profiling publishWaypoints_msg;
+      ecl::StopWatch stopwatch1;
       Node.publishWaypoints(hover);
+      ecl::Duration stopwatch1_duration = stopwatch1.elapsed();
+      ;
+      publishWaypoints_sw.counter_ += 1;
+      setProfilingMsg(publishWaypoints_msg, frame_id, "publishWaypoints",
+                      static_cast<ros::Duration>(stopwatch1_duration),
+                      publishWaypoints_sw.counter_);
+      Node.duration_measurement_pub_.publish(publishWaypoints_msg);
+      publishWaypoints_sw.total_duration_ += publishWaypoints_msg.duration;
+
       if (!hover) Node.status_msg_.state = (int)MAV_STATE::MAV_STATE_ACTIVE;
     } else {
       for (size_t i = 0; i < Node.cameras_.size(); ++i) {

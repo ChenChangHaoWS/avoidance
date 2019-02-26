@@ -178,7 +178,8 @@ void StarPlanner::buildLookAheadTree() {
                     static_cast<ros::Duration>(stopwatch_duration),
                     generateNewHistogram_sw_.counter_);
     duration_measurement_pub_.publish(generateNewHistogram_msg);
-    generateNewHistogram_sw_.total_duration_ += generateNewHistogram_msg.duration;    
+    generateNewHistogram_sw_.total_duration_ +=
+        generateNewHistogram_msg.duration;
 
     local_planner::Profiling combinedHistogram_msg;
     stopwatch.restart();
@@ -196,7 +197,7 @@ void StarPlanner::buildLookAheadTree() {
     // calculate candidates
     Eigen::MatrixXf cost_matrix;
     std::vector<candidateDirection> candidate_vector;
-    
+
     local_planner::Profiling getCostMatrix_msg;
     stopwatch.restart();
     getCostMatrix(histogram, goal_, origin_position, origin_origin_position,
@@ -252,7 +253,7 @@ void StarPlanner::buildLookAheadTree() {
           float h = treeHeuristicFunction(tree_.size() - 1);
 
           local_planner::Profiling treeCostFunction_msg;
-          stopwatch.restart();          
+          stopwatch.restart();
           float c = treeCostFunction(tree_.size() - 1);
           stopwatch_duration = stopwatch.elapsed();
           treeCostFunction_sw_.counter_ += 1;
@@ -262,7 +263,6 @@ void StarPlanner::buildLookAheadTree() {
                           treeCostFunction_sw_.counter_);
           duration_measurement_pub_.publish(treeCostFunction_msg);
           treeCostFunction_sw_.total_duration_ += treeCostFunction_msg.duration;
-
 
           tree_.back().heuristic_ = h;
           tree_.back().total_cost_ =

@@ -140,6 +140,7 @@ class StarPlanner {
   StopWatch treeCostFunction_sw_;
 
   ros::Publisher duration_measurement_pub_;
+  const ros::NodeHandle& nodeHandle() const { return nh_; }
 };
 }
 #endif  // STAR_PLANNER_H

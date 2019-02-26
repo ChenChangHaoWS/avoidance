@@ -465,13 +465,13 @@ void LocalPlanner::determineStrategy() {
           stopwatch_duration = stopwatch.elapsed();
           buildLookAheadTree_sw_.counter_ += 1;
           setProfilingMsg(buildLookAheadTree_msg, profiling_frame_id_dS_,
-                          "histogramRelevanceCheck",
+                          "buildLookAheadTree",
                           static_cast<ros::Duration>(stopwatch_duration),
                           buildLookAheadTree_sw_.counter_);
           duration_measurement_pub_.publish(buildLookAheadTree_msg);
           buildLookAheadTree_sw_.total_duration_ +=
               buildLookAheadTree_msg.duration;
-
+          printf("buildLookAheadTree\n");
           waypoint_type_ = tryPath;
           last_path_time_ = ros::Time::now();
         } else {

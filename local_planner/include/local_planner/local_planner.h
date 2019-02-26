@@ -284,6 +284,8 @@ class LocalPlanner {
   * @brief     starts a iteration of the local planner algorithm
   **/
   void runPlanner();
+
+  const ros::NodeHandle &nodeHandle() const { return nh_; }
 };
 }
 

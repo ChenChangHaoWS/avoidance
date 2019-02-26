@@ -119,6 +119,9 @@ class LocalPlannerNode {
 
   StopWatch setPose_sw_;
   StopWatch setCurrentVelocity_sw_;
+  StopWatch getWaypoints_sw_;
+  StopWatch transformVelocityToTrajectory_sw_;
+  StopWatch transformPoseToTrajectory_sw_;
 
   ModelParameters model_params_;
 
@@ -277,6 +280,7 @@ class LocalPlannerNode {
   boost::recursive_mutex config_mutex_;
 
   std::string profiling_frame_id_uPI_ = "/../updatePlannerInfo";
+  std::string profiling_frame_id_pubW_ = "/../publishWaypoints";
   /**
   * @brief     callaback for parameters dynamic reconfigure server
   * @param     config, struct with all the parameters
