@@ -223,7 +223,7 @@ void LocalPlannerNode::updatePlannerInfo() {
   local_planner_->setPose(newest_pose_);
   ecl::Duration stopwatch1_duration = stopwatch1.elapsed();
   setPose_sw_.counter_ += 1;
-  setProfilingMsg(setPose_msg, profiling_frame_id_, "setPose",
+  setProfilingMsg(setPose_msg, profiling_frame_id_uPI_, "setPose",
                   static_cast<ros::Duration>(stopwatch1_duration),
                   setPose_sw_.counter_);
   duration_measurement_pub_.publish(setPose_msg);
@@ -235,7 +235,7 @@ void LocalPlannerNode::updatePlannerInfo() {
   local_planner_->setCurrentVelocity(vel_msg_);
   stopwatch1_duration = stopwatch1.elapsed();
   setCurrentVelocity_sw_.counter_ += 1;
-  setProfilingMsg(setCurrentVelocity_msg, profiling_frame_id_,
+  setProfilingMsg(setCurrentVelocity_msg, profiling_frame_id_uPI_,
                   "setCurrentVelocity",
                   static_cast<ros::Duration>(stopwatch1_duration),
                   setCurrentVelocity_sw_.counter_);

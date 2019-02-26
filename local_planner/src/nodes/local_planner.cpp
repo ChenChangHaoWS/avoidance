@@ -127,7 +127,7 @@ void LocalPlanner::runPlanner() {
                static_cast<float>(yaw), static_cast<float>(pitch));
   ecl::Duration stopwatch_duration = stopwatch.elapsed();
   calculateFOV_sw_.counter_ += 1;
-  setProfilingMsg(calculateFOV_msg, profiling_frame_id_, "calculateFOV",
+  setProfilingMsg(calculateFOV_msg, profiling_frame_id_rP_, "calculateFOV",
                   static_cast<ros::Duration>(stopwatch_duration),
                   calculateFOV_sw_.counter_);
   duration_measurement_pub_.publish(calculateFOV_msg);
@@ -143,7 +143,7 @@ void LocalPlanner::runPlanner() {
                    toEigen(pose_.pose.position), min_realsense_dist_);
   stopwatch_duration = stopwatch.elapsed();
   filterPointCloud_sw_.counter_ += 1;
-  setProfilingMsg(filterPointCloud_msg, profiling_frame_id_, "filterPointCloud",
+  setProfilingMsg(filterPointCloud_msg, profiling_frame_id_rP_, "filterPointCloud",
                   static_cast<ros::Duration>(stopwatch_duration),
                   filterPointCloud_sw_.counter_);
   duration_measurement_pub_.publish(filterPointCloud_msg);
@@ -154,7 +154,7 @@ void LocalPlanner::runPlanner() {
   determineStrategy();
   stopwatch_duration = stopwatch.elapsed();
   determineStrategy_sw_.counter_ += 1;
-  setProfilingMsg(determineStrategy_msg, profiling_frame_id_,
+  setProfilingMsg(determineStrategy_msg, profiling_frame_id_rP_,
                   "determineStrategy",
                   static_cast<ros::Duration>(stopwatch_duration),
                   determineStrategy_sw_.counter_);
