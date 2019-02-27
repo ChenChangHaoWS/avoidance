@@ -157,8 +157,6 @@ class LocalPlannerNode {
   ros::Publisher mavros_system_status_pub_;
   tf::TransformListener tf_listener_;
 
-  ros::Publisher duration_measurement_pub_;
-
   std::mutex running_mutex_;  ///< guard against concurrent access to input &
                               /// output data (point cloud, position, ...)
 
@@ -279,8 +277,8 @@ class LocalPlannerNode {
   dynamic_reconfigure::Server<avoidance::LocalPlannerNodeConfig>* server_;
   boost::recursive_mutex config_mutex_;
 
-  std::string profiling_frame_id_uPI_ = "/../updatePlannerInfo";
-  std::string profiling_frame_id_pubW_ = "/../publishWaypoints";
+  std::string profiling_frame_id_uPI_ = "/../upPlannerInfo";
+  std::string profiling_frame_id_pubW_ = "/../pubWp";
   /**
   * @brief     callaback for parameters dynamic reconfigure server
   * @param     config, struct with all the parameters

@@ -9,11 +9,7 @@
 
 namespace avoidance {
 
-LocalPlanner::LocalPlanner() : star_planner_(new StarPlanner()) {
-  nh_ = ros::NodeHandle("~");
-  duration_measurement_pub_ =
-      nh_.advertise<local_planner::Profiling>("/performance_check", 1);
-}
+LocalPlanner::LocalPlanner() : star_planner_(new StarPlanner()) {}
 
 LocalPlanner::~LocalPlanner() {}
 
@@ -130,7 +126,7 @@ void LocalPlanner::runPlanner() {
   setProfilingMsg(calculateFOV_msg, profiling_frame_id_rP_, "calculateFOV",
                   static_cast<ros::Duration>(stopwatch_duration),
                   calculateFOV_sw_.counter_);
-  duration_measurement_pub_.publish(calculateFOV_msg);
+  calculateFOV_sw_.duration_measurement_pub_.publish(calculateFOV_msg);
   calculateFOV_sw_.total_duration_ += calculateFOV_msg.duration;
 
   histogram_box_.setBoxLimits(pose_.pose.position, ground_distance_);
@@ -147,7 +143,7 @@ void LocalPlanner::runPlanner() {
                   "filterPointCloud",
                   static_cast<ros::Duration>(stopwatch_duration),
                   filterPointCloud_sw_.counter_);
-  duration_measurement_pub_.publish(filterPointCloud_msg);
+  filterPointCloud_sw_.duration_measurement_pub_.publish(filterPointCloud_msg);
   filterPointCloud_sw_.total_duration_ += filterPointCloud_msg.duration;
 
   local_planner::Profiling determineStrategy_msg;
@@ -159,7 +155,8 @@ void LocalPlanner::runPlanner() {
                   "determineStrategy",
                   static_cast<ros::Duration>(stopwatch_duration),
                   determineStrategy_sw_.counter_);
-  duration_measurement_pub_.publish(determineStrategy_msg);
+  determineStrategy_sw_.duration_measurement_pub_.publish(
+      determineStrategy_msg);
   determineStrategy_sw_.total_duration_ += determineStrategy_msg.duration;
 }
 
@@ -175,7 +172,7 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
                   "reprojectPoints",
                   static_cast<ros::Duration>(stopwatch_duration),
                   reprojectPoints_sw_.counter_);
-  duration_measurement_pub_.publish(reprojectPoints_msg);
+  reprojectPoints_sw_.duration_measurement_pub_.publish(reprojectPoints_msg);
   reprojectPoints_sw_.total_duration_ += reprojectPoints_msg.duration;
 
   Histogram propagated_histogram = Histogram(2 * ALPHA_RES);
@@ -192,7 +189,8 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
                   "propagateHistogram",
                   static_cast<ros::Duration>(stopwatch_duration),
                   propagateHistogram_sw_.counter_);
-  duration_measurement_pub_.publish(propagateHistogram_msg);
+  propagateHistogram_sw_.duration_measurement_pub_.publish(
+      propagateHistogram_msg);
   propagateHistogram_sw_.total_duration_ += propagateHistogram_msg.duration;
 
   local_planner::Profiling generateNewHistogram_msg;
@@ -205,7 +203,8 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
                   "generateNewHistogram",
                   static_cast<ros::Duration>(stopwatch_duration),
                   generateNewHistogram_sw_.counter_);
-  duration_measurement_pub_.publish(generateNewHistogram_msg);
+  generateNewHistogram_sw_.duration_measurement_pub_.publish(
+      generateNewHistogram_msg);
   generateNewHistogram_sw_.total_duration_ += generateNewHistogram_msg.duration;
 
   local_planner::Profiling combinedHistogram_msg;
@@ -218,7 +217,8 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
                   "combinedHistogram",
                   static_cast<ros::Duration>(stopwatch_duration),
                   combinedHistogram_sw_.counter_);
-  duration_measurement_pub_.publish(combinedHistogram_msg);
+  combinedHistogram_sw_.duration_measurement_pub_.publish(
+      combinedHistogram_msg);
   combinedHistogram_sw_.total_duration_ += combinedHistogram_msg.duration;
 
   if (send_to_fcu) {
@@ -231,7 +231,8 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
                     "compressHistogramElevation",
                     static_cast<ros::Duration>(stopwatch_duration),
                     compressHistogramElevation_sw_.counter_);
-    duration_measurement_pub_.publish(compressHistogramElevation_msg);
+    compressHistogramElevation_sw_.duration_measurement_pub_.publish(
+        compressHistogramElevation_msg);
     compressHistogramElevation_sw_.total_duration_ +=
         compressHistogramElevation_msg.duration;
 
@@ -244,7 +245,8 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
                     "updateObstacleDistanceMsg_w",
                     static_cast<ros::Duration>(stopwatch_duration),
                     updateObstacleDistanceMsg_sw_.counter_);
-    duration_measurement_pub_.publish(updateObstacleDistanceMsg_msg);
+    updateObstacleDistanceMsg_sw_.duration_measurement_pub_.publish(
+        updateObstacleDistanceMsg_msg);
     updateObstacleDistanceMsg_sw_.total_duration_ +=
         updateObstacleDistanceMsg_msg.duration;
   }
@@ -309,7 +311,8 @@ void LocalPlanner::determineStrategy() {
                       profiling_frame_id_dS_, "create2DObstacleRepresentation",
                       static_cast<ros::Duration>(stopwatch_duration),
                       create2DObstacleRepresentation_sw_.counter_);
-      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.duration_measurement_pub_.publish(
+          create2DObstacleRepresentation_msg);
       create2DObstacleRepresentation_sw_.total_duration_ +=
           create2DObstacleRepresentation_msg.duration;
     }
@@ -327,7 +330,8 @@ void LocalPlanner::determineStrategy() {
                     "stopInFrontObstacles",
                     static_cast<ros::Duration>(stopwatch_duration),
                     stopInFrontObstacles_sw_.counter_);
-    duration_measurement_pub_.publish(stopInFrontObstacles_msg);
+    stopInFrontObstacles_sw_.duration_measurement_pub_.publish(
+        stopInFrontObstacles_msg);
     stopInFrontObstacles_sw_.total_duration_ +=
         stopInFrontObstacles_msg.duration;
 
@@ -343,7 +347,8 @@ void LocalPlanner::determineStrategy() {
                       profiling_frame_id_dS_, "create2DObstacleRepresentation",
                       static_cast<ros::Duration>(stopwatch_duration),
                       create2DObstacleRepresentation_sw_.counter_);
-      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.duration_measurement_pub_.publish(
+          create2DObstacleRepresentation_msg);
       create2DObstacleRepresentation_sw_.total_duration_ +=
           create2DObstacleRepresentation_msg.duration;
     }
@@ -374,7 +379,8 @@ void LocalPlanner::determineStrategy() {
                         "create2DObstacleRepresentation",
                         static_cast<ros::Duration>(stopwatch_duration),
                         create2DObstacleRepresentation_sw_.counter_);
-        duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+        create2DObstacleRepresentation_sw_.duration_measurement_pub_.publish(
+            create2DObstacleRepresentation_msg);
         create2DObstacleRepresentation_sw_.total_duration_ +=
             create2DObstacleRepresentation_msg.duration;
       }
@@ -389,7 +395,8 @@ void LocalPlanner::determineStrategy() {
                       "evaluateProgressRate",
                       static_cast<ros::Duration>(stopwatch_duration),
                       evaluateProgressRate_sw_.counter_);
-      duration_measurement_pub_.publish(evaluateProgressRate_msg);
+      evaluateProgressRate_sw_.duration_measurement_pub_.publish(
+          evaluateProgressRate_msg);
       evaluateProgressRate_sw_.total_duration_ +=
           evaluateProgressRate_msg.duration;
 
@@ -402,7 +409,8 @@ void LocalPlanner::determineStrategy() {
                       profiling_frame_id_dS_, "create2DObstacleRepresentation",
                       static_cast<ros::Duration>(stopwatch_duration),
                       create2DObstacleRepresentation_sw_.counter_);
-      duration_measurement_pub_.publish(create2DObstacleRepresentation_msg);
+      create2DObstacleRepresentation_sw_.duration_measurement_pub_.publish(
+          create2DObstacleRepresentation_msg);
       create2DObstacleRepresentation_sw_.total_duration_ +=
           create2DObstacleRepresentation_msg.duration;
 
@@ -441,7 +449,7 @@ void LocalPlanner::determineStrategy() {
                       "histogramRelevanceCheck",
                       static_cast<ros::Duration>(stopwatch_duration),
                       histRelCheck_sw_.counter_);
-      duration_measurement_pub_.publish(histRelCheck_msg);
+      histRelCheck_sw_.duration_measurement_pub_.publish(histRelCheck_msg);
       histRelCheck_sw_.total_duration_ += histRelCheck_msg.duration;
       // decide how to proceed
       if (hist_is_empty_ || !hist_relevant) {
@@ -468,7 +476,8 @@ void LocalPlanner::determineStrategy() {
                           "buildLookAheadTree",
                           static_cast<ros::Duration>(stopwatch_duration),
                           buildLookAheadTree_sw_.counter_);
-          duration_measurement_pub_.publish(buildLookAheadTree_msg);
+          buildLookAheadTree_sw_.duration_measurement_pub_.publish(
+              buildLookAheadTree_msg);
           buildLookAheadTree_sw_.total_duration_ +=
               buildLookAheadTree_msg.duration;
           printf("buildLookAheadTree\n");
@@ -487,7 +496,8 @@ void LocalPlanner::determineStrategy() {
                           "getCostMatrix",
                           static_cast<ros::Duration>(stopwatch_duration),
                           getCostMatrix_sw_.counter_);
-          duration_measurement_pub_.publish(getCostMatrix_msg);
+          getCostMatrix_sw_.duration_measurement_pub_.publish(
+              getCostMatrix_msg);
           getCostMatrix_sw_.total_duration_ += getCostMatrix_msg.duration;
 
           local_planner::Profiling getBestCand_msg;
@@ -499,7 +509,7 @@ void LocalPlanner::determineStrategy() {
                           "getBestCand",
                           static_cast<ros::Duration>(stopwatch_duration),
                           getBestCand_sw_.counter_);
-          duration_measurement_pub_.publish(getBestCand_msg);
+          getBestCand_sw_.duration_measurement_pub_.publish(getBestCand_msg);
           getBestCand_sw_.total_duration_ += getBestCand_msg.duration;
 
           if (candidate_vector_.empty()) {

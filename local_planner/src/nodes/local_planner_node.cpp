@@ -115,9 +115,6 @@ LocalPlannerNode::LocalPlannerNode() {
   get_px4_param_client_ =
       nh_.serviceClient<mavros_msgs::ParamGet>("/mavros/param/get");
 
-  duration_measurement_pub_ =
-      nh_.advertise<local_planner::Profiling>("/performance_check", 1);
-
   local_planner_->applyGoal();
 }
 
@@ -226,7 +223,7 @@ void LocalPlannerNode::updatePlannerInfo() {
   setProfilingMsg(setPose_msg, profiling_frame_id_uPI_, "setPose",
                   static_cast<ros::Duration>(stopwatch1_duration),
                   setPose_sw_.counter_);
-  duration_measurement_pub_.publish(setPose_msg);
+  setPose_sw_.duration_measurement_pub_.publish(setPose_msg);
   setPose_sw_.total_duration_ += setPose_msg.duration;
 
   local_planner::Profiling setCurrentVelocity_msg;
@@ -239,7 +236,8 @@ void LocalPlannerNode::updatePlannerInfo() {
                   "setCurrentVelocity",
                   static_cast<ros::Duration>(stopwatch1_duration),
                   setCurrentVelocity_sw_.counter_);
-  duration_measurement_pub_.publish(setCurrentVelocity_msg);
+  setCurrentVelocity_sw_.duration_measurement_pub_.publish(
+      setCurrentVelocity_msg);
   setCurrentVelocity_sw_.total_duration_ += setCurrentVelocity_msg.duration;
 
   // update state
@@ -510,7 +508,7 @@ void LocalPlannerNode::publishWaypoints(bool hover) {
   setProfilingMsg(getWaypoints_msg, profiling_frame_id_pubW_, "getWaypoints",
                   static_cast<ros::Duration>(stopwatch1_duration),
                   getWaypoints_sw_.counter_);
-  duration_measurement_pub_.publish(getWaypoints_msg);
+  getWaypoints_sw_.duration_measurement_pub_.publish(getWaypoints_msg);
   getWaypoints_sw_.total_duration_ += getWaypoints_msg.duration;
 
   visualization_msgs::Marker sphere1;
@@ -605,7 +603,8 @@ void LocalPlannerNode::publishWaypoints(bool hover) {
                     "transformVelocityToTrajectory",
                     static_cast<ros::Duration>(stopwatch1_duration),
                     transformVelocityToTrajectory_sw_.counter_);
-    duration_measurement_pub_.publish(transformVeltoTraj_msg);
+    transformVelocityToTrajectory_sw_.duration_measurement_pub_.publish(
+        transformVeltoTraj_msg);
     transformVelocityToTrajectory_sw_.total_duration_ +=
         transformVeltoTraj_msg.duration;
   } else {
@@ -620,7 +619,8 @@ void LocalPlannerNode::publishWaypoints(bool hover) {
                     "transformPoseToTrajectory",
                     static_cast<ros::Duration>(stopwatch1_duration),
                     transformPoseToTrajectory_sw_.counter_);
-    duration_measurement_pub_.publish(transformPosetoTraj_msg);
+    transformPoseToTrajectory_sw_.duration_measurement_pub_.publish(
+        transformPosetoTraj_msg);
     transformPoseToTrajectory_sw_.total_duration_ +=
         transformPosetoTraj_msg.duration;
   }

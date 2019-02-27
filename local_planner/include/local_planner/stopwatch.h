@@ -14,6 +14,8 @@
 
 #include <local_planner/Profiling.h>
 
+#include <local_planner/LocalPlannerNodeConfig.h>
+
 namespace avoidance {
 /**
  * @brief A timepiece that emulates the functionality of a stopwatch.
@@ -30,6 +32,8 @@ class StopWatch {
   ros::Duration duration_s_;
   int counter_ = 0;
   std::string function_name_;
+
+  ros::Publisher duration_measurement_pub_;
   /**
    * Default constructor that initialises the stopwatch with the current
    * system time to use as a point of reference.
@@ -62,6 +66,7 @@ class StopWatch {
                          const std::string& frame_id);
 
  private:
+  ros::NodeHandle timing_node_;
   ros::Time start_time_, split_time_;
 };
 void setProfilingMsg(local_planner::Profiling& msg, const std::string& frame_id,

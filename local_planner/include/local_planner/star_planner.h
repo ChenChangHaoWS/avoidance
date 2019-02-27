@@ -29,8 +29,6 @@ namespace avoidance {
 class TreeNode;
 
 class StarPlanner {
-  ros::NodeHandle nh_;
-
   float h_FOV_ = 59.0f;
   float v_FOV_ = 46.0f;
   int children_per_node_ = 1;
@@ -49,8 +47,7 @@ class StarPlanner {
   geometry_msgs::PoseStamped pose_;
   costParameters cost_params_;
 
-  std::string profiling_frame_id_buildTree_ =
-      "/../../rPlanner/dStrategy/buildLookAheadTree";
+  std::string profiling_frame_id_buildTree_ = "/../../rPlanner/dStrat/buildLAT";
 
  protected:
   /**
@@ -138,9 +135,6 @@ class StarPlanner {
   StopWatch getBestCand_sw_;
   StopWatch findBestNode_sw_;
   StopWatch treeCostFunction_sw_;
-
-  ros::Publisher duration_measurement_pub_;
-  const ros::NodeHandle& nodeHandle() const { return nh_; }
 };
 }
 #endif  // STAR_PLANNER_H

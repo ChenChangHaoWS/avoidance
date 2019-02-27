@@ -46,8 +46,6 @@ class TreeNode;
 
 class LocalPlanner {
  private:
-  ros::NodeHandle nh_;
-
   bool use_back_off_;
   bool use_VFH_star_;
   bool adapt_cost_params_;
@@ -117,10 +115,9 @@ class LocalPlanner {
   Eigen::MatrixXf cost_matrix_;
   std::vector<candidateDirection> candidate_vector_;
 
-  std::string profiling_frame_id_rP_ = "/../../runPlanner";
-  std::string profiling_frame_id_dS_ = "/../../runPlanner/determineStrategy";
-  std::string profiling_frame_id_2D_ =
-      "/../../runPlanner/determineStrategy/create2DObstacleRepresentation";
+  std::string profiling_frame_id_rP_ = "/../../rPlanner";
+  std::string profiling_frame_id_dS_ = "/../../rPlanner/dStrat";
+  std::string profiling_frame_id_2D_ = "/../../rPlanner/dStrat/create2DObsRep";
   /**
   * @brief     reprojectes the histogram from the previous algorithm iteration
   *around the current vehicle position
@@ -202,8 +199,6 @@ class LocalPlanner {
   StopWatch updateObstacleDistanceMsg_sw_;
   StopWatch buildLookAheadTree_sw_;
 
-  ros::Publisher duration_measurement_pub_;
-
   // complete_cloud_ contains n complete clouds from the cameras
   std::vector<pcl::PointCloud<pcl::PointXYZ>> complete_cloud_;
 
@@ -284,8 +279,6 @@ class LocalPlanner {
   * @brief     starts a iteration of the local planner algorithm
   **/
   void runPlanner();
-
-  const ros::NodeHandle &nodeHandle() const { return nh_; }
 };
 }
 

@@ -35,8 +35,6 @@ struct waypointResult {
 
 class WaypointGenerator {
  private:
-  ros::NodeHandle nh_;
-
   avoidanceOutput planner_info_;
   waypointResult output_;
   waypoint_choice last_wp_type_;
@@ -113,8 +111,9 @@ class WaypointGenerator {
   **/
   void getPathMsg();
 
-  std::string profiling_frame_id_getWp_ = "/../../pubWp/getWp";
-  std::string profiling_frame_id_calWp_ = "/../../pubWp/getWp/calWp";
+  std::string profiling_frame_id_getWp_ = "/../pubWp/getWp";
+  std::string profiling_frame_id_calWp_ = "/../pubWp/getWp/calWp";
+  std::string profiling_frame_id_getP_ = "/../pubWp/getWp/calWp/getPath";
 
  public:
   /**
@@ -168,10 +167,9 @@ class WaypointGenerator {
   StopWatch calculateWaypoint_sw_;
   StopWatch getPathMsg_sw_;
   StopWatch getDirectionFromTree_sw_;
-
-  ros::Publisher duration_measurement_pub_;
-
-  const ros::NodeHandle& nodeHandle() const { return nh_; }
+  StopWatch nextSmoothYaw_sw_;
+  StopWatch adaptSpeed_sw_;
+  StopWatch smoothWaypoint_sw_;
 
   WaypointGenerator();
   virtual ~WaypointGenerator() = default;

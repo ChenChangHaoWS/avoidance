@@ -5,7 +5,9 @@
 namespace avoidance {
 
 StopWatch::StopWatch() {
-  // start_time_ = ros::Time::now();
+  timing_node_ = ros::NodeHandle("~");
+  duration_measurement_pub_ =
+      timing_node_.advertise<local_planner::Profiling>("/performance_check", 1);
 }
 
 void StopWatch::restart() {

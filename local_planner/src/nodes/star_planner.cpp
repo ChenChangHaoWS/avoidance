@@ -7,11 +7,7 @@
 
 namespace avoidance {
 
-StarPlanner::StarPlanner() : tree_age_(0) {
-  nh_ = ros::NodeHandle("~");
-  duration_measurement_pub_ =
-      nh_.advertise<local_planner::Profiling>("/performance_check", 1);
-}
+StarPlanner::StarPlanner() : tree_age_(0) {}
 
 // set parameters changed by dynamic rconfigure
 void StarPlanner::dynamicReconfigureSetStarParams(
@@ -149,7 +145,7 @@ void StarPlanner::buildLookAheadTree() {
                     "calculateFOV",
                     static_cast<ros::Duration>(stopwatch_duration),
                     calculateFOV_sw_.counter_);
-    duration_measurement_pub_.publish(calculateFOV_msg);
+    calculateFOV_sw_.duration_measurement_pub_.publish(calculateFOV_msg);
     calculateFOV_sw_.total_duration_ += calculateFOV_msg.duration;
 
     Histogram propagated_histogram = Histogram(2 * ALPHA_RES);
@@ -165,7 +161,8 @@ void StarPlanner::buildLookAheadTree() {
                     "propagateHistogram",
                     static_cast<ros::Duration>(stopwatch_duration),
                     propagateHistogram_sw_.counter_);
-    duration_measurement_pub_.publish(propagateHistogram_msg);
+    propagateHistogram_sw_.duration_measurement_pub_.publish(
+        propagateHistogram_msg);
     propagateHistogram_sw_.total_duration_ += propagateHistogram_msg.duration;
 
     local_planner::Profiling generateNewHistogram_msg;
@@ -177,7 +174,8 @@ void StarPlanner::buildLookAheadTree() {
                     "generateNewHistogram",
                     static_cast<ros::Duration>(stopwatch_duration),
                     generateNewHistogram_sw_.counter_);
-    duration_measurement_pub_.publish(generateNewHistogram_msg);
+    generateNewHistogram_sw_.duration_measurement_pub_.publish(
+        generateNewHistogram_msg);
     generateNewHistogram_sw_.total_duration_ +=
         generateNewHistogram_msg.duration;
 
@@ -191,7 +189,8 @@ void StarPlanner::buildLookAheadTree() {
                     "combinedHistogram",
                     static_cast<ros::Duration>(stopwatch_duration),
                     combinedHistogram_sw_.counter_);
-    duration_measurement_pub_.publish(combinedHistogram_msg);
+    combinedHistogram_sw_.duration_measurement_pub_.publish(
+        combinedHistogram_msg);
     combinedHistogram_sw_.total_duration_ += combinedHistogram_msg.duration;
 
     // calculate candidates
@@ -208,7 +207,7 @@ void StarPlanner::buildLookAheadTree() {
                     "getCostMatrix",
                     static_cast<ros::Duration>(stopwatch_duration),
                     getCostMatrix_sw_.counter_);
-    duration_measurement_pub_.publish(getCostMatrix_msg);
+    getCostMatrix_sw_.duration_measurement_pub_.publish(getCostMatrix_msg);
     getCostMatrix_sw_.total_duration_ += getCostMatrix_msg.duration;
 
     local_planner::Profiling getBestCand_msg;
@@ -221,7 +220,7 @@ void StarPlanner::buildLookAheadTree() {
                     "getBestCand",
                     static_cast<ros::Duration>(stopwatch_duration),
                     getBestCand_sw_.counter_);
-    duration_measurement_pub_.publish(getBestCand_msg);
+    getBestCand_sw_.duration_measurement_pub_.publish(getBestCand_msg);
     getBestCand_sw_.total_duration_ += getBestCand_msg.duration;
 
     // add candidates as nodes
@@ -261,7 +260,8 @@ void StarPlanner::buildLookAheadTree() {
                           "treeCostFunction",
                           static_cast<ros::Duration>(stopwatch_duration),
                           treeCostFunction_sw_.counter_);
-          duration_measurement_pub_.publish(treeCostFunction_msg);
+          treeCostFunction_sw_.duration_measurement_pub_.publish(
+              treeCostFunction_msg);
           treeCostFunction_sw_.total_duration_ += treeCostFunction_msg.duration;
 
           tree_.back().heuristic_ = h;
@@ -298,7 +298,7 @@ void StarPlanner::buildLookAheadTree() {
                     "findBestNode_BuildTree",
                     static_cast<ros::Duration>(stopwatch_duration),
                     findBestNode_sw_.counter_);
-    duration_measurement_pub_.publish(findBestNode_msg);
+    findBestNode_sw_.duration_measurement_pub_.publish(findBestNode_msg);
     findBestNode_sw_.total_duration_ += findBestNode_msg.duration;
   }
   // smoothing between trees

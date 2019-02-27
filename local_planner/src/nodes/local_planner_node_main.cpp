@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   Node.status_msg_.state = (int)MAV_STATE::MAV_STATE_BOOT;
 
   StopWatch threadFunction_sw;
-  std::string frame_id = "/local_planner_node_main";
+  std::string frame_id = "/main";
   ecl::StopWatch stopwatch0;
   local_planner::Profiling threadFunction_msg;
 
@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
   setProfilingMsg(threadFunction_msg, frame_id, "threadFunction",
                   static_cast<ros::Duration>(stopwatch0_duration),
                   threadFunction_sw.counter_);
-  Node.duration_measurement_pub_.publish(threadFunction_msg);
+  threadFunction_sw.duration_measurement_pub_.publish(threadFunction_msg);
   threadFunction_sw.total_duration_ += threadFunction_msg.duration;
 
   StopWatch updatePlannerInfo_sw;
@@ -129,7 +129,8 @@ int main(int argc, char** argv) {
           setProfilingMsg(updatePlannerInfo_msg, frame_id, "updatePlannerInfo",
                           static_cast<ros::Duration>(stopwatch1_duration),
                           updatePlannerInfo_sw.counter_);
-          Node.duration_measurement_pub_.publish(updatePlannerInfo_msg);
+          updatePlannerInfo_sw.duration_measurement_pub_.publish(
+              updatePlannerInfo_msg);
           updatePlannerInfo_sw.total_duration_ +=
               updatePlannerInfo_msg.duration;
 
@@ -150,7 +151,8 @@ int main(int argc, char** argv) {
           setProfilingMsg(setPlannerInfo_msg, frame_id, "setPlannerInfo",
                           static_cast<ros::Duration>(stopwatch1_duration),
                           setPlannerInfo_sw.counter_);
-          Node.duration_measurement_pub_.publish(setPlannerInfo_msg);
+          setPlannerInfo_sw.duration_measurement_pub_.publish(
+              setPlannerInfo_msg);
           setPlannerInfo_sw.total_duration_ += setPlannerInfo_msg.duration;
 
           if (Node.local_planner_->stop_in_front_active_) {
@@ -176,7 +178,8 @@ int main(int argc, char** argv) {
       setProfilingMsg(publishWaypoints_msg, frame_id, "publishWaypoints",
                       static_cast<ros::Duration>(stopwatch1_duration),
                       publishWaypoints_sw.counter_);
-      Node.duration_measurement_pub_.publish(publishWaypoints_msg);
+      publishWaypoints_sw.duration_measurement_pub_.publish(
+          publishWaypoints_msg);
       publishWaypoints_sw.total_duration_ += publishWaypoints_msg.duration;
 
       if (!hover) Node.status_msg_.state = (int)MAV_STATE::MAV_STATE_ACTIVE;
